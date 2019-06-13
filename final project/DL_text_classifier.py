@@ -148,20 +148,21 @@ allThemes = ['авто/мото', 'активный отдых','бизнес','
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
-@app.route('/text_classifier/api', methods=['POST', 'PUT'])
+@app.route('/api/classify', methods=['POST'])
 def create_task():
-    if (request.method == 'POST'):
-        text = request.json['text']
-        try:
-            themes = request.json['themes']
-        except Exception:
-            themes = allThemes
-        return jsonify(textClassifier.themesOfTheText(text, themes)), 201
-    if (request.method == 'PUT'):
-        text = request.json['text']
+    text = request.json['text']
+    try:
         themes = request.json['themes']
-        textClassifier.updateDLNetwork(text, themes)
-        return jsonify(textClassifier.themesOfTheText(text, allThemes)), 201
+    except Exception:
+        themes = allThemes
+    return jsonify(textClassifier.themesOfTheText(text, themes)), 201
+
+@app.route('/api/learn', methods=['POST'])
+def create_task():
+    text = request.json['text']
+    themes = request.json['themes']
+    textClassifier.updateDLNetwork(text, themes)
+    return jsonify(textClassifier.themesOfTheText(text, allThemes)), 201
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80)
