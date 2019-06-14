@@ -1,9 +1,14 @@
 from flask import Flask, jsonify, request, make_response, abort
+from wtforms import Form, StringField, validators, FieldList
+from wtforms.validators import DataRequired
+import wtforms_json
+import json
+
 from ufal.udpipe import Model, Pipeline
 import torch
 import torch.nn as nn
 import re
-import json
+
 
 class Net(nn.Module):
     def __init__(self, input_size, hidden_size, num_classes):
@@ -30,6 +35,7 @@ class DLTextClassifier (object):
         self.net = Net(2000, 1000, 42)
         self.net.load_state_dict(torch.load(sourceForDL, map_location='cpu'))
         self.needToSearch = False
+        self.boolClassify = False
         
         self.clasterOfWord = {}
         with open(sourceForDict) as json_file:  
@@ -128,14 +134,27 @@ class DLTextClassifier (object):
         returnData = {}
         for i in range ( len(themes) ):
             index = self.idOfThemes[themes[i]]
-            returnData.update({themes[i]: int ( 100 * float(vecOfRelation[index]))})
+            if (self.boolClassify):
+                returnData.update({themes[i]: int ( 1.9 * float(vecOfRelation[index]))})
+            else:
+                returnData.update({themes[i]: int ( 100 * float(vecOfRelation[index]))})
         return returnData
+
+class RequestFormForLearn(Form):
+    text = StringField('text', validators = [DataRequired()])
+    themes = FieldList(StringField('themes', validators = [DataRequired()]), validators = [DataRequired()])
+
+class RequestFormForClassify(Form):
+    text = StringField('text', validators = [DataRequired()])
 #--------------------------------------------------------------------------------------------------------------------
+wtforms_json.init()
+
 app = Flask(__name__)
 app.config['JSON_AS_ASCII'] = False
 
 textClassifier = DLTextClassifier('udpipe_syntagrus.model', 'clastersOfWords.txt', 'neurotext_with_vec.pkl')
-
+textClassifier.needToSearch = False
+textClassifier.boolClassify = False
 allThemes = ['авто/мото', 'активный отдых','бизнес','домашние животные','здоровье','знакомство и общение','игры',
              'ИТ (компьютеры и софт)','кино','красота и мода','кулинария','культура и искусство','литература',
              'мобильная связь и интернет','музыка','наука и техника','недвижимость','новости и СМИ','безопасность',
@@ -148,21 +167,22 @@ allThemes = ['авто/мото', 'активный отдых','бизнес','
 def not_found(error):
     return make_response(jsonify({'error': 'Not found'}), 404)
 
-@app.route('/api/classify', methods=['POST'])
-def create_task():
-    text = request.json['text']
-    try:
-        themes = request.json['themes']
-    except Exception:
-        themes = allThemes
-    return jsonify(textClassifier.themesOfTheText(text, themes)), 201
-
 @app.route('/api/learn', methods=['POST'])
-def create_task():
-    text = request.json['text']
-    themes = request.json['themes']
-    textClassifier.updateDLNetwork(text, themes)
-    return jsonify(textClassifier.themesOfTheText(text, allThemes)), 201
+def task_learn():
+    requestForm = RequestFormForLearn.from_json(request.json)
+    if (requestForm.validate()):
+        textClassifier.updateDLNetwork(requestForm.text.data, requestForm.themes.data)
+        return jsonify(textClassifier.themesOfTheText(requestForm.text.data, allThemes)), 201
+    else:
+        return jsonify(requestForm.errors)
+
+@app.route('/api/classify', methods=['POST'])
+def task_classify():
+    requestForm = RequestFormForClassify.from_json(request.json)
+    if (requestForm.validate()):
+        return jsonify(textClassifier.themesOfTheText(requestForm.text.data, allThemes)), 201
+    else:
+        return jsonify(requestForm.errors)
 
 if __name__ == "__main__":
     app.run(host='0.0.0.0', port=80)
