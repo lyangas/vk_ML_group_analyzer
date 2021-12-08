@@ -1,0 +1,25 @@
+version: '2'
+
+services:
+    nginx:
+        image: nginx:alpine
+        ports:
+            - "14299:5080"
+        volumes:
+            - ./www:/var/www
+            - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+            
+        
+        links:
+            - neurotext
+    neurotext:
+        
+        build: ./api
+        
+        volumes:
+            - ./api/listsOfUsers:/listsOfUsers
+            - ./api/sessions:/sessions
+            - ./api/Название-NN:/Название-NN
+            - ./api/Посты-NN:/Посты-NN
+        ports:
+            - "81:5080"

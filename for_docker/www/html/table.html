@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>NeuroIL</title>
+  <!-- Tell the browser to be responsive to screen width -->
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+  <!-- Bootstrap 3.3.7 -->
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.min.css">
+  <!-- Ionicons -->
+  <link rel="stylesheet" href="bower_components/Ionicons/css/ionicons.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="dist/css/AdminLTE.min.css">
+  <!-- AdminLTE Skins. Choose a skin from the css/skins
+       folder instead of downloading all of them to reduce the load. -->
+  <link rel="stylesheet" href="dist/css/skins/_all-skins.min.css">
+  <!-- Morris chart -->
+  <link rel="stylesheet" href="bower_components/morris.js/morris.css">
+  <!-- jvectormap -->
+  <link rel="stylesheet" href="bower_components/jvectormap/jquery-jvectormap.css">
+  <!-- Date Picker -->
+  <link rel="stylesheet" href="bower_components/bootstrap-datepicker/dist/css/bootstrap-datepicker.min.css">
+  <!-- Daterange picker -->
+  <link rel="stylesheet" href="bower_components/bootstrap-daterangepicker/daterangepicker.css">
+  <!-- bootstrap wysihtml5 - text editor -->
+  <link rel="stylesheet" href="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.min.css">
+
+  <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700,300italic,400italic,600italic">
+  <link rel="stylesheet" href="https://cdn.datatables.net/1.10.18/css/dataTables.bootstrap.min.css">
+
+</head>
+<body class="hold-transition skin-blue sidebar-mini">
+  <div id="downloadUsersWindow" style="display: none">
+    <div style="
+      background: rgba(0,0,0,.5);
+      width: 100%;
+      height: 100%;
+      z-index: 99;
+      position: fixed;
+    "></div>
+    <div class="col-lg-6" style="position: fixed; top: 10%; left: 30%; z-index: 999; width: 600px;">
+      <div class="box box-success">
+        <div class="box-header with-border">
+          <h3 class="box-title">Скачать аудитории</h3>
+          <i class="fa fa-close closeLearnWindow"  id="closeDownloadUsersWindow" style=" right: 10px; position: absolute;"></i>
+        </div>
+        <div class="box-body">
+          <form role="form">
+            <div class="form-group">
+              <label>Название для Аудитории</label>
+              <input type="text" class="form-control" placeholder="Подписчики больших групп по инфобиз..." id="listOfUsersName">
+            </div>
+            <button class="btn btn-primary btn-block" id="exportUsers">Скачать подписчиков</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="learnWindow" style="display: none">
+    <div style="
+      background: rgba(0,0,0,.5);
+      width: 100%;
+      height: 100%;
+      z-index: 99;
+      position: fixed;
+    "></div>
+    <div class="col-lg-6" style="position: fixed; top: 10%; left: 30%; z-index: 999; width: 600px;">
+      <div class="box box-success">
+        <div class="box-header with-border">
+          <h3 class="box-title">Обучение</h3>
+          <i class="fa fa-close closeLearnWindow"  id="closeLearnWindow" style=" right: 10px; position: absolute;"></i>
+        </div>
+        <div class="box-body">
+          <form role="form">
+            <div class="form-group">
+              <label>Список ссылок на сообщества</label>
+              <textarea class="form-control" rows="11" placeholder="http://vk.com/club...." id="groupsForLearn" style="height: 248px;"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Тематика</label>
+              <input type="text" class="form-control" placeholder="Например семья..." id="themeForLearn">
+            </div>
+            <button class="btn btn-primary btn-block" id="learnButton">Обучить указанной тематике</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="classifyWindow" style="display: none">
+    <div style="
+      background: rgba(0,0,0,.5);
+      width: 100%;
+      height: 100%;
+      z-index: 99;
+      position: fixed;
+    "></div>
+    <div class="col-lg-6" style="position: fixed; top: 10%; left: 30%; z-index: 999; width: 600px;">
+          <div class="box box-warning">
+            <div class="box-header with-border">
+              <h3 class="box-title">Классификация сообществ</h3>
+              <i class="fa fa-close closeClassifyWindow"  id="closeClassifyWindow" style=" right: 10px; position: absolute;"></i>
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <form role="form">
+                <div class="form-group">
+                    <div class="form-group row">
+                      <div class="col-xs-3" style="width: 50%;">
+                        <label>Что классифицируем?</label>
+                        <select class="form-control" id="typeOfInputData">
+                          <option>Список сообществ</option>
+                          <option>Список пользователей</option>
+                        </select>
+                      </div>
+
+                      <div class="col-xs-3" style="width: 50%;">
+                        <label>Закрытые группы учитываем?</label>
+                        <select class="form-control" id="closedGroups">
+                          <option>И закрытые и открытые</option>
+                          <option>Только закрытые</option>
+                          <option>Только открытые</option>
+                        </select>
+                      </div>
+                    </div> 
+                    <div  id="showCommonUsersCounter" style="display: none">
+                      <label>Сколько общих пользователей из загруженной аудитории? </label>
+                      <div class="form-group row">
+                        <div class="col-xs-3" style="width: 50%;">
+                          <textarea class="form-control" rows="1" placeholder="ОТ" id="commonUsersFrom" style="height: 34px;"></textarea>
+                        </div>
+                        <div class="col-xs-3" style="width: 50%;">
+                          <textarea class="form-control" rows="1" placeholder="ДО" id="commonUsersTo" style="height: 34px;"></textarea>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div class="form-group row">
+                    <label class="col-sm-2 col-form-label">Название Сессии</label>
+                    <div class="col-sm-10">
+                      <input type="email" class="form-control" id="sessionName" placeholder="Анализ аудитории 1....">
+                    </div>
+                  </div>
+
+                  <textarea class="form-control" rows="6" placeholder="http://vk.com/club...." id="groupsForClassify"></textarea>
+
+                </div>
+                <div class="form-group">
+                 
+                  <label>Количество анализируемых объектов у сообщества</label>
+                  <div class="row">
+                    <div class="col-xs-3">
+                      <div class="form-group">
+                        <label>Название</label>
+                        <select class="form-control" id="name">
+                          <option>0</option>
+                          <option>1</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-xs-3">
+                      <div class="form-group">
+                        <label>Статус</label>
+                        <select class="form-control" id="status">
+                          <option>0</option>
+                          <option>1</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-xs-3">
+                      <div class="form-group">
+                        <label>Описание</label>
+                        <select class="form-control" id="disc">
+                          <option>0</option>
+                          <option>1</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-xs-3">
+                      <div class="form-group">
+                        <label>Посты</label>
+                        <select class="form-control" id="posts">
+                          <option>0</option>
+                          <option>1</option>
+                          <option>3</option>
+                          <option>5</option>
+                          <option>10</option>
+                          <option>15</option>
+                          <option>20</option>
+                          <option>35</option>
+                          <option>50</option>
+                          <option>80</option>
+                          <option>100</option>
+                        </select>
+                      </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-xs-3">
+                      <div class="form-group">
+                        <label>Видео</label>
+                        <select class="form-control" id="videos">
+                          <option>0</option>
+                          <option>1</option>
+                          <option>3</option>
+                          <option>5</option>
+                          <option>10</option>
+                          <option>15</option>
+                          <option>20</option>
+                          <option>35</option>
+                          <option>50</option>
+                          <option>80</option>
+                          <option>100</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-xs-3">
+                      <div class="form-group">
+                        <label>Альбомы</label>
+                        <select class="form-control" id="albums">
+                          <option>0</option>
+                          <option>1</option>
+                          <option>3</option>
+                          <option>5</option>
+                          <option>10</option>
+                          <option>15</option>
+                          <option>20</option>
+                          <option>35</option>
+                          <option>50</option>
+                          <option>80</option>
+                          <option>100</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-xs-3">
+                      <div class="form-group">
+                        <label>Обсуждения</label>
+                        <select class="form-control" id="topics">
+                          <option>0</option>
+                          <option>1</option>
+                          <option>3</option>
+                          <option>5</option>
+                          <option>10</option>
+                          <option>15</option>
+                          <option>20</option>
+                          <option>35</option>
+                          <option>50</option>
+                          <option>80</option>
+                          <option>100</option>
+                        </select>
+                      </div>
+                    </div>
+                    <div class="col-xs-3">
+                      <div class="form-group">
+                        <label>Ссылки</label>
+                        <select class="form-control" id="links">
+                          <option>0</option>
+                          <option>1</option>
+                          <option>3</option>
+                          <option>5</option>
+                          <option>10</option>
+                          <option>15</option>
+                          <option>20</option>
+                          <option>35</option>
+                          <option>50</option>
+                          <option>80</option>
+                          <option>100</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+                <label id="avarageTime">Примерное время классификации:</label>
+                <script type="text/javascript">
+                  
+                </script>
+                <button class="btn btn-primary btn-block" id="classifyButton">классифицировать сообщества</button>
+              </form>
+              </div>
+            </div>
+          </div>
+        </div>
+  </div>
+<div class="wrapper">
+
+  <header class="main-header" style="position: fixed;">
+    <!-- Logo -->
+    <a class="logo">
+      <!-- mini logo for sidebar mini 50x50 pixels -->
+      <span class="logo-mini"><b>N</b>IL</span>
+      <!-- logo for regular state and mobile devices -->
+      <span class="logo-lg"><b>Neuro</b>IL</span>
+    </a>
+    <!-- Header Navbar: style can be found in header.less -->
+    <nav class="navbar navbar-static-top">
+    </nav>
+  </header>
+  <aside class="main-sidebar" style="position: fixed;">
+    <section class="sidebar">
+      <ul class="sidebar-menu" data-widget="tree">
+        <li class="treeview">
+          <a href="#" id="openTask">
+            <i class="fa fa-table"></i> <span>Запущенное обучение</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu" id="currentTask">
+            <button class="btn btn-primary btn-block" id="openLearnWindow" style="width: 80%; margin-left: auto; margin-right: auto;">Обучить новой тематике</button>
+          </ul>
+        </li>
+        <li class="treeview">
+          <a href="#" id="columns">
+            <i class="fa fa-table"></i> <span>Столбцы</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu" id="currentColumns"></ul>
+        </li>
+        <li class="treeview">
+          <a href="#" id="sessions">
+            <i class="fa fa-table"></i> <span>Сессии</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu" id="currentSessions">
+            <button class="btn btn-primary btn-block" id="openClassifyWindow" style="width: 80%; margin-left: auto; margin-right: auto;">
+              Создать новую
+            </button>
+          </ul>
+        </li>
+        <li class="treeview">
+          <a href="#" id="subscribers">
+            <i class="fa fa-table"></i> <span>Скаченные подписчики</span>
+            <span class="pull-right-container">
+              <i class="fa fa-angle-left pull-right"></i>
+            </span>
+          </a>
+          <ul class="treeview-menu" id="listOfSubscribers"></ul>
+        </li>
+      </ul>
+    </section>
+  </aside>
+
+  <div class="content-wrapper">
+    <section class="content-header">
+      <h1>
+        Админка
+        <small>Нейронки по классификации сообществ по тематикам</small>
+      </h1>
+    </section>
+
+    <section class="content">
+        <div class="row">
+        <div class="col-lg-12">
+          <div class="box box-warning">
+            <div class="box-header with-border">
+              <div class="box-header with-border">
+                <h3 class="box-title">Коэффициенты</h3>
+              </div>
+              <div class="box-body">
+                <div class="box-header with-border">
+                <div class="row" id="coefficients">
+                  </div>
+                </div>
+              </div>
+              
+                <h3 class="box-title">Результат</h3>
+                <button id="exportBotton" type="submit" class="btn btn-default">Экспорт в EXEL</button>
+                <button id="delSessionBotton" type="submit" class="btn btn-default">Удалить сессию</button>
+                <button id="downloadCheckerGroups" type="submit" class="btn btn-default">Скачать выделенные сообщества</button>
+              
+              
+              
+            </div>
+            <!-- /.box-header -->
+            <div class="box-body">
+              <form role="form">
+                <div class="form-group" id="forIncertTable">
+                  <table id="resultsTable" class="table table-bordered table-striped" style="width:initial;">
+                  </table>
+                </div>
+              </form>
+            </div>
+            <!-- /.box-body -->
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- /.content -->
+  </div>
+  <!-- /.content-wrapper -->
+  
+    </div>
+  </aside>
+  <!-- /.control-sidebar -->
+  <!-- Add the sidebar's background. This div must be placed
+       immediately after the control sidebar -->
+  <div class="control-sidebar-bg"></div>
+</div>
+<!-- ./wrapper -->
+
+<!-- jQuery 3 -->
+<script src="bower_components/jquery/dist/jquery.min.js"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="bower_components/jquery-ui/jquery-ui.min.js"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+  $.widget.bridge('uibutton', $.ui.button);
+</script>
+<!-- Bootstrap 3.3.7 -->
+<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+<!-- Morris.js charts -->
+<script src="bower_components/raphael/raphael.min.js"></script>
+<script src="bower_components/morris.js/morris.min.js"></script>
+<!-- Sparkline -->
+<script src="bower_components/jquery-sparkline/dist/jquery.sparkline.min.js"></script>
+<!-- jvectormap -->
+<script src="plugins/jvectormap/jquery-jvectormap-1.2.2.min.js"></script>
+<script src="plugins/jvectormap/jquery-jvectormap-world-mill-en.js"></script>
+<!-- jQuery Knob Chart -->
+<script src="bower_components/jquery-knob/dist/jquery.knob.min.js"></script>
+<!-- daterangepicker -->
+<script src="bower_components/moment/min/moment.min.js"></script>
+<script src="bower_components/bootstrap-daterangepicker/daterangepicker.js"></script>
+<!-- datepicker -->
+<script src="bower_components/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js"></script>
+<!-- Bootstrap WYSIHTML5 -->
+<script src="plugins/bootstrap-wysihtml5/bootstrap3-wysihtml5.all.min.js"></script>
+<!-- Slimscroll -->
+<script src="bower_components/jquery-slimscroll/jquery.slimscroll.min.js"></script>
+<!-- FastClick -->
+<script src="bower_components/fastclick/lib/fastclick.js"></script>
+<!-- AdminLTE App -->
+<script src="dist/js/adminlte.min.js"></script>
+<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
+
+<!-- AdminLTE for demo purposes -->
+<script src="dist/js/demo.js"></script>
+<script src="https://cdn.datatables.net/1.10.18/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.18/js/dataTables.bootstrap.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<!-- для таблицы -->
+
+<script src="forTable/jquery.table2excel.js"></script>
+
+<script type="application/javascript">
+'use strict';
+
+class MyCell {
+
+  constructor(innerHTMLconstructor, val, column, row, isHeader = false, fixThisRow = false, showInRow = true, trueNorm=0, currentNorm = 0) {
+    this.isHeader = isHeader;
+    this.val = val;
+    this.innerHTMLconstructor = innerHTMLconstructor;
+    this.showInColumn = true;
+    this.showInRow = showInRow;
+    this.fixThisRow = fixThisRow;
+    this.column = column;
+    this.row = row;
+    this.trueNorm = trueNorm;
+    this.currentNorm = currentNorm;
+  }
+
+  getHTML() {
+    return this.innerHTMLconstructor(this.val);
+  }
+
+  getCellFromBody(column, row){
+    return document.getElementById('resultsTableBody').querySelectorAll('tr')[this.row].querySelectorAll('td')[this.column];
+  }
+
+  getCellFromHeader(column){
+    return document.getElementById('resultsTableHeader').querySelectorAll('tr')[0].querySelectorAll('th')[this.column];
+  }
+
+  changeVisibleInRow(visibleLevel){
+    this.showInRow = visibleLevel;
+    var newLevel = 'none';
+    if (visibleLevel){
+      newLevel = '';
+    }
+    if (this.isHeader){
+      var cell = this.getCellFromHeader();
+      cell.style.display = newLevel;
+    } else {
+      var cell = this.getCellFromBody();
+      cell.style.display = newLevel;
+    }
+  }
+
+}
+
+class MyTable {
+  constructor() {
+    this.baseHeaderNames = ["Название", "Ссылка", "Размер аудитории", "Участники", "% участников"];
+    this.specialColumn = ['Check'];
+    this.headers = [];
+    this.body = [];
+    this.allThemes = [];
+    this.objectNames = ['Название', 'Статус', 'Описание', 'Посты', 'Видео', 'Альбомы', 'Обсуждения', 'Ссылки'];
+    this.visibleColums = {};
+    this.checked = true;
+    this.cellsFunctionsPrototypes = {
+      'headers': {
+        'checkboxes': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          //console.log(visible);
+          return '<th id="column_' + val.replaceAll(' ', '_') + '" style="display:' + visible + ';">' + val + '</th>\n';
+        },
+        'baseColumns': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          return '<th id="column_' + val.replaceAll(' ', '_') + '" style="display:' + visible + ';">' + val + '<i data-header=' + val + '></i></th>\n';
+        },
+        'percentUsers': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          return '<th id="column_' + val.replaceAll(' ', '_') + '" style="display:' + visible + ';">' + '% уч.' + '<i data-header=' + val + '></i></th>\n';
+        },
+        'themes': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          return '<th id="column_' + val.replaceAll(' ', '_') + '" style="display:' + visible + ';">' + val + '<i class="fa fa-close removeThemeButton" data-header=' + val + '></i></th>\n';
+        }
+      },
+        
+      'body': {
+        'checkboxes': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          return '<td style="display:' + visible + ';"><input class="checkboxes-in-row" type="checkbox"></td>';
+        },
+        'data': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          return '<td style="display:' + visible + ';">' + val + '</td>\n';
+        },
+        'percentUsers': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          val = first2NomberAfterDot(val, 2);
+          return '<td style="display:' + visible + ';">' + val + '</td>\n';
+        },
+        'searchChecked': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          return '<td style="display:' + visible + ';"><select class="" id="links" style="width: 40px;"><option>все</option><option>выбраны</option><option>не выбраны</option></select></td>\n';
+        },
+        'searchText': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          return '<td style="display:' + visible + ';"><input placeholder="Найти" style="width: 100%;" type="text"></td>\n';
+        },
+        'searchFrom': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          return '<td style="display:' + visible + ';"><input placeholder="от" style="width: 100%;" type="text"></td>\n';
+        },
+        'searchTo': function (val){
+          if ((this.showInRow)){ var visible = ''; } 
+          else { var visible = 'none'; }
+          return '<td style="display:' + visible + ';"><input placeholder="До" style="width: 100%;" type="text"></td>\n';
+        },
+        'values': function (rawVal){
+          if ((this.showInRow)){ var visible = ''; } //(this.showInColumn || this.fixThisRow) && 
+          else { var visible = 'none'; }
+          //если тематика нова, то в столбце выводим НЗ
+          if (rawVal == undefined){
+            return '<td style="display:' + visible + ';">' + 'НЗ' + '</td>\n'; 
+          }
+          //находим значение ячейки с учетом всех коэффициентов
+          var objectNames = ['Название', 'Статус', 'Описание', 'Посты', 'Видео', 'Альбомы', 'Обсуждения', 'Ссылки'];
+          var val = 0;
+          var norm = 0;
+          var currentNorm = 0;
+          objectNames.forEach(keyObject => {
+            currentNorm = currentNorm + Number(document.getElementById(keyObject).value);
+          });
+          objectNames.forEach(keyObject => {
+            var indOfNN = document.getElementById(keyObject.replaceAll(' ', '_') + "-NN").options.selectedIndex;
+            var nameOfNN = document.getElementById(keyObject.replaceAll(' ', '_') + "-NN").options[indOfNN].text;
+            var v = rawVal[keyObject][nameOfNN];
+            if (currentNorm != 0){
+              var k = Number(document.getElementById(keyObject).value);
+              norm = currentNorm;
+            } else {
+              var k = 1;
+              norm = this.trueNorm;
+            }
+            val = val + v * k;
+          });
+          if (val != 0){
+
+            val = Math.floor (100 * val / norm);
+          } else {
+            val = -1;
+          }
+          return '<td style="display:' + visible + ';">' + val + '</td>\n';
+        }
+      }
+    };
+
+    this.init();
+
+  }
+
+  async init(){
+    this.allThemes = await getResponseFromApi('GET', 'getListOfThemes', '');
+    await this.createHeaders();
+    await this.createBodySearch();
+    this.visibleColums['Check'] = true;
+    await this.headers.forEach(headerItem => {
+      this.visibleColums[headerItem.val] = true;  
+    });
+  }
+
+  async createHeaders (){
+    var headers = [];
+    var columnIndex = 0;
+    
+    headers.push(new MyCell(this.cellsFunctionsPrototypes['headers']['checkboxes'], 'Check', columnIndex, 0, true, true));
+    columnIndex += 1;
+
+    await this.baseHeaderNames.forEach(theme => {
+      if (theme != '% участников'){
+        headers.push(new MyCell(this.cellsFunctionsPrototypes['headers']['baseColumns'], theme, columnIndex, 0, true, true));
+      } else {
+        headers.push(new MyCell(this.cellsFunctionsPrototypes['headers']['percentUsers'], theme, columnIndex, 0, true, true));
+      }
+      columnIndex += 1;
+    });
+    await this.allThemes.forEach(theme => {
+      headers.push(new MyCell(this.cellsFunctionsPrototypes['headers']['themes'], theme, columnIndex, 0, true, false));
+      columnIndex += 1;
+    });
+    this.headers = headers;
+  }
+
+  async createBodySearch (){
+    var firstRow = [];
+    var secondRow = [];
+    var allThemes = this.baseHeaderNames.concat(this.allThemes);
+    var columnIndex = 0;
+
+    firstRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['data'], '', columnIndex, 0, false, true))
+    secondRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['searchChecked'], '', columnIndex, 1, false, true));
+    columnIndex += 1;
+
+    allThemes.forEach(headerItem => {
+      if ((headerItem == 'Название') || (headerItem == 'Ссылка')) {
+        firstRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['data'], '', columnIndex, 0, false, true));
+        secondRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['searchText'], '', columnIndex, 1, false, true));
+      }
+      else {
+        firstRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['searchFrom'], '', columnIndex, 0, false, true));
+        secondRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['searchTo'], '', columnIndex, 1, false, true));
+      }
+      columnIndex += 1;
+    });
+    this.body.push(firstRow);
+    this.body.push(secondRow);
+  }
+
+  changeShowInColumn(rowIndex, visibleVal){
+    console.log('ind' + rowIndex);
+    console.log(visibleVal);
+    this.body[rowIndex].forEach(cell => {
+      cell.showInColumn = visibleVal;
+    });
+  }
+
+  changeCheckRow(rowIndex, visibleVal){
+    this.body[rowIndex].forEach(cell => {
+      cell.checked = visibleVal;
+    });
+  }
+
+  updateVisibleColumns (){
+    this.headers.forEach(headerItem => {
+      //console.log('headerItem' + headerItem);
+      //console.log('this.visibleColums[headerItem.val] = ' + this.visibleColums[headerItem.val]);
+      //console.log('headerItem.val ' + headerItem.val);
+      headerItem.changeVisibleInRow(this.visibleColums[headerItem.val])
+    });
+    this.body.forEach(bodyItem => {
+      bodyItem.forEach(cell => {
+        var columnIndex = bodyItem.indexOf(cell);
+        var visibleLevel = this.visibleColums[this.headers[columnIndex].val];
+        //console.log('headerItem.val ' + headerItem.val);
+        cell.changeVisibleInRow(visibleLevel);
+      });
+    }); 
+  }
+
+  getHTML (){
+    //строим строку названий
+    var returnHTML = '';
+    returnHTML += '<thead id="resultsTableHeader">\n';
+    returnHTML += '<tr>\n';
+    this.headers.forEach(headerItem => {
+      returnHTML  += headerItem.getHTML();
+    });
+    returnHTML += '</tr>\n';
+    returnHTML += '</thead>\n';
+
+    //строим строки body
+    returnHTML += '<tbody id="resultsTableBody">\n';
+    this.body.forEach( function(row, index) {
+      if (index == 0){ returnHTML += '<tr class="table-filters-from">\n'; }
+      if (index == 1){ returnHTML += '<tr class="table-filters-to">\n'; }
+      if (index > 1){ returnHTML += '<tr class="table-data">\n'; }
+      //else { returnHTML += '<tr>\n'; }
+      row.forEach(cell =>{
+        returnHTML  += cell.getHTML();
+      });
+      returnHTML += '</tr>\n';
+    });
+    returnHTML += '</tbody>\n';
+
+    return returnHTML;
+  }
+
+  buildTable(){
+    document.getElementById("resultsTable").innerHTML = this.getHTML();
+    var columns = this.baseHeaderNames.concat(this.allThemes);
+
+    setTimeout(function(){
+
+      $('.table-filters-to select').change(function () {
+        filterTableFrom($(this).parents('table'));
+      });
+
+      $('.table-filters-from input').on('input', function () {
+        filterTableFrom($(this).parents('table'));
+      });
+      
+      $('.table-filters-to input').on('input', function () {
+        filterTableFrom($(this).parents('table'));//$('#resultsTableBody')
+      });
+
+      columns.forEach( function(columnName){
+        var script= document.createElement('script');
+        script.type= 'text/javascript';
+        script.textContent = '$("#column_' + columnName.replaceAll(' ', '_') + '").click(function(){dir *= -1;var n = $(this).prevAll().length; currentSortColumn = n; console.log(n);sortTable(dir,n);});';
+        script.async = true;
+        document.body.appendChild(script);
+      });
+      sortTable(dir, currentSortColumn);
+      
+    }, 1000);
+  }
+
+  updateTable(){
+    var lengthRows = document.getElementById('resultsTableBody').rows.length;
+    for (var index = 2; index < lengthRows; index++) {
+        document.getElementById('resultsTableBody').deleteRow(2);
+    }
+    var newBodyData = this.getBodyDataHTML();
+    $('#resultsTableBody').append(newBodyData);
+    $.myTable.body.forEach(function(row, index){
+      if (index >1){
+        var cell = row[0];
+        console.log(cell);
+        var checkCell = cell.getCellFromBody();
+        console.log(checkCell);
+        checkCell.querySelector('input').checked = cell.checked;
+      }
+    }); 
+
+    filterTableFrom($('#resultsTableBody'));
+
+    $('.checkboxes-in-row').change(function () {
+      filterTableFrom($(this).parents('table'));
+    });
+  }
+
+  getBodyDataHTML(){
+    var returnHTML = '';
+    this.body.forEach( function(row, index) {
+      if (index > 1){ 
+        returnHTML += '<tr class="table-data">\n'; 
+        row.forEach(cell =>{
+          returnHTML  += cell.getHTML();
+        });
+        returnHTML += '</tr>\n';
+        }
+    });
+    return returnHTML;
+  }
+
+  findNormForRow(rowData){
+    var objectNames = this.objectNames;
+    //смотрим, заполнены ли коэффициенты в таблице
+    var currentNorm = 0;
+    objectNames.forEach(keyObject => {
+      currentNorm = currentNorm + Number(document.getElementById(keyObject).value);
+    });
+    //пробегаем все тематики, пока не найдем достаточно старую, в которой у ячейки есть значения (не undefined)
+    var trueNorm = 0;
+    this.allThemes.every(function (column, index) {
+      var cellData = rowData['data'][column];
+      if (cellData != undefined){
+        //ищем нормировочный коэф по ненулевым данным
+        objectNames.forEach(keyObject => {
+          if (cellData[keyObject]['Посты-NN'] != 0){
+            trueNorm += 1;
+          }
+        });
+        return false;
+      } else {
+        return true;
+      }
+    });
+    return {'trueNorm': trueNorm, 'currentNorm': currentNorm};
+  }
+
+  buildBodyWithResult(result){
+    this.body.splice(2);
+    var visible = this.visibleColums;
+    var rowIndex = 2;
+    result.forEach(rowData => {
+      var norm = this.findNormForRow(rowData);
+      var newRow = [];
+      var columnIndex = 0;
+
+      newRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['checkboxes'], '', columnIndex, rowIndex, false, false, visible['Check']));
+      columnIndex+= 1;
+
+      this.baseHeaderNames.forEach(column => {
+        if (column == 'Название') {
+          var dots = '';
+          if (rowData[column].length > 40){
+            dots = '...';
+          }
+          rowData[column] = rowData[column].substr(0, 40) + dots;
+        }
+        var showInRow = visible[column];
+        if (column != '% участников'){
+          newRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['data'], rowData[column], columnIndex, rowIndex, false, false, showInRow, norm['trueNorm'], norm['currentNorm']));
+        } else {
+          newRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['percentUsers'], rowData[column], columnIndex, rowIndex, false, false, showInRow, norm['trueNorm'], norm['currentNorm']));
+        }
+        columnIndex += 1;
+      });
+      this.allThemes.forEach(column => {
+        var showInRow = visible[column];
+        newRow.push(new MyCell(this.cellsFunctionsPrototypes['body']['values'], rowData['data'][column], columnIndex, rowIndex, false, false, showInRow, norm['trueNorm'], norm['currentNorm']));
+        columnIndex += 1;
+      });
+      rowIndex += 1;
+      this.body.push(newRow);
+    });
+
+    return this.updateTable();
+  }
+}
+
+</script>
+
+
+<script type="application/javascript">
+var myVKCode = document.location.href.split('code=')[1];
+$.myinfo = '';
+$.token = '';
+initVKSession();
+async function initVKSession(){
+  $.myinfo = await getVKId(myVKCode);
+  if ($.myinfo == null){
+    window.location.href='http://ml.vtargete.ru/group_analyzer';
+  }
+  $.token = $.myinfo['access_token'];
+}
+//$.objectNames = ['Название', 'Статус', 'Описание', 'Посты', 'Видео', 'Альбомы', 'Обсуждения', 'Ссылки'];
+var dir = 1;
+var currentSortColumn = '';
+$.currentTableName = '';
+
+$("#groupsURL").click(function(){
+  dir *= -1;
+  var n = $(this).prevAll().length;
+  sortTable(dir,n);
+});
+
+var vkCode = document.location.href.split('code=')[1];
+$.myTable = new MyTable();
+pastCoeffRow();
+
+setTimeout(function(){
+  $.myTable.buildTable();
+}, 1000);
+
+$.classifyProcess = -1;
+$(document).ready( function (){
+  'use strict';
+
+  $("#typeOfInputData").change(function(){
+    var indOfTypeOfInputData = document.getElementById("typeOfInputData").options.selectedIndex;
+    var typeOfInputData = document.getElementById("typeOfInputData").options[indOfTypeOfInputData].text;
+    if (typeOfInputData == "Список сообществ"){
+      document.getElementById("showCommonUsersCounter").style.display = "none";
+    }
+    else{
+      document.getElementById("showCommonUsersCounter").style.display = "";
+    }
+  });
+
+  $('#closeClassifyWindow').click(function(e){
+    e.preventDefault();
+    document.getElementById("classifyWindow").style.display = "none";
+  });
+
+  $('#closeLearnWindow').click(function(e){
+    e.preventDefault();
+    document.getElementById("learnWindow").style.display = "none";
+  });
+
+  $('#closeDownloadUsersWindow').click(function(e){
+    e.preventDefault();
+    document.getElementById("downloadUsersWindow").style.display = "none";
+  });
+
+  $('#classifyButton').click(function (e) {
+    e.preventDefault();
+    document.getElementById("classifyWindow").style.display = "none";
+    $.classifyProcess = $.classifyProcess * (-1);
+    classifyAllItems();
+  });
+
+  $('#delSessionBotton').click(async function(e){
+    e.preventDefault();
+    var data = {'sessionName': $.currentTableName};
+    await getResponseFromApi('POST', 'delSessions', data);
+    await updateListOfSessions();
+  });
+  
+  $('#reloadTable').click(function (e) {
+    e.preventDefault();
+    $.myTable.updateTable();
+  });
+
+  $('#learnButton').click(function (e) {
+    e.preventDefault();
+    document.getElementById("learnWindow").style.display = "none";
+    learnNNWithSpecifiedItems();  
+  });
+
+  $('#openTask').click( function(e){
+    e.preventDefault();
+    updateListOfTask();
+  });
+
+  $('#sessions').click( function(e){
+    e.preventDefault();
+    updateListOfSessions();
+  });
+
+  $('#columns').click( function(e){
+    e.preventDefault();
+    openColumnsList();
+  });
+
+  $('#subscribers').click( function(e){
+    e.preventDefault();
+    updateListOfSubscribers();
+  });
+
+  $('.col-xs-3').change(function(){
+    updateAvarageTime();
+  });
+
+  $('#groupsForClassify').on('input', function(){
+    console.log(1);
+    updateAvarageTime();
+  });
+
+  $('#downloadCheckerGroups').click( function() {
+    var indexOfNameRow
+    $.myTable.headers.forEach(function(cell, index) {
+      if (cell.val == "Ссылка") {
+        indexOfNameRow = index;
+      }
+    });
+
+    var groupsArr = [];
+    $.myTable.body.forEach(row => {
+      if (row[indexOfNameRow].showInColumn){
+        var groupURL = row[indexOfNameRow].val;
+        if (groupURL != ''){
+          groupsArr.push(groupURL);
+        }
+      }
+    });
+
+    console.log(groupsArr);
+    exportArray(groupsArr, 'выбранные сообщества из ' + $.currentTableName);
+  });
+
+  $('#exportBotton').click( function(e){
+    e.preventDefault();
+    console.log('exporting table');
+    document.querySelectorAll('.table-filters-from')[0].style.display='none';
+    document.querySelectorAll('.table-filters-to')[0].style.display='none';
+    var table = $('#resultsTable');
+
+    if(table && table.length){
+      var preserveColors = (table.hasClass('table2excel_with_colors') ? true : false);
+      $('#resultsTable').table2excel({
+        exclude: ".noExl",
+        name: "Excel Document Name",
+        filename: $.currentTableName + ".xls",
+        fileext: ".xls",
+        exclude_img: true,
+        exclude_links: true,
+        exclude_inputs: true,
+        preserveColors: preserveColors
+      });
+    }
+
+    document.querySelectorAll('.table-filters-from')[0].style.display='';
+    document.querySelectorAll('.table-filters-to')[0].style.display='';
+  });
+  
+
+
+  $('#exportUsers').click(async function(e){
+    e.preventDefault();
+    document.getElementById("downloadUsersWindow").style.display = "none";
+    console.log('exporting users');
+    var indexOfColumn = $.results.headers.indexOf("Cсылка");
+    var groupUrls = [];
+    document.querySelectorAll(".table-data").forEach(row => {
+      var linkCell = row.querySelectorAll("td")[indexOfColumn];
+      if (row.style['display'] == ''){
+        groupUrls.push(linkCell.innerText);
+      }
+    });
+    var listOfUsersName = document.getElementById('listOfUsersName').value;
+    var res = await getResponseFromApi('POST', 'getUsersFromURLs', {'groupURLs': groupUrls, 'token': $.token, 'listOfUsersName': listOfUsersName});
+  }); 
+
+}).on('click','.removeThemeButton',function () {
+  var item = $(this);
+  var headerItem = item.data('header');
+  removeTheme(headerItem);
+});
+
+function filterTableFrom($table) {
+  var $filtersFrom = $table.find('.table-filters-from td');
+  var $filtersTo = $table.find('.table-filters-to td');
+  var $rows = $table.find('.table-data');
+  $rows.each(function (rowIndex) {
+    var valid = true;
+    var rowCheckedVal = true;
+    $(this).find('td').each(function (colIndex) {
+      if ($filtersFrom.eq(colIndex)[0].innerHTML != ''){
+        if ($filtersFrom.eq(colIndex).find('input').val()) {
+          minVal = Number($filtersFrom.eq(colIndex).find('input').val());
+        }else{
+          minVal = -1;
+        }
+        if ($filtersTo.eq(colIndex).find('input').val()) {
+          maxVal = Number($filtersTo.eq(colIndex).find('input').val());
+        }else{
+          maxVal = -1;
+        }
+        if ((($(this).html().toLowerCase().split(' %')[0] < minVal) && (minVal != -1)) ||
+          (($(this).html().toLowerCase().split(' %')[0] > maxVal) && (maxVal != -1))) {
+          valid = valid && false;
+        }
+      } else {
+        if ($filtersTo.eq(colIndex).find('input').val() != undefined){
+          findText = $filtersTo.eq(colIndex).find('input').val();
+          if (($(this).html().toLowerCase().indexOf(findText.toLowerCase()) + 1) == 0){
+            valid = valid && false;
+          }
+        } else {
+          findCheckedVal = $filtersTo.eq(0).find('select').val();
+          rowCheckedVal = $(this).find('input')[0].checked
+          if ((findCheckedVal == 'выбраны') && (!rowCheckedVal)){
+            valid = valid && false;
+          }
+          if ((findCheckedVal == 'не выбраны') && (rowCheckedVal)){
+            valid = valid && false;
+          }
+
+        }
+      }
+    });
+    if (valid === true) {
+        $(this).css('display', '');
+    } else {
+        $(this).css('display', 'none');
+    }
+    $.myTable.changeShowInColumn(rowIndex + 2, valid);
+    $.myTable.changeCheckRow(rowIndex + 2, rowCheckedVal);
+  });
+}
+
+function updateAvarageTime(){
+  var sumOfCoef = getValuesFromFieldsForClassify()['sum'];
+  var groupsCount = document.getElementById("groupsForClassify").value.split('\n').length;
+  var sec = groupsCount * sumOfCoef * (4/5);
+  var h = sec/3600 ^ 0 ;
+  var m = (sec-h*3600)/60 ^ 0 ;
+  var s = sec-h*3600-m*60;
+  document.getElementById('avarageTime').innerText = 'Примерное время классификации: ' + (h<10?"0"+h:h)+" ч. "+(m<10?"0"+m:m)+" мин. ";//+(s<10?"0"+s:s)+" сек.";
+}
+
+function pastCoeffRow(){
+  $.each($.myTable.objectNames, function(index, objectName){
+    if ((objectName == 'Название') || (objectName == 'Статус')){
+      $("#coefficients").append('<div class="col-xs-1"><div class="form-group"><label>'+objectName+'</label><input type="text" class="form-control" placeholder="0 - 10" id="'+objectName+'"></div><select class="form-control" id="'+objectName+'-NN"><option>Название-NN</option><option>Посты-NN</option></select></div>');
+    }else {
+      $("#coefficients").append('<div class="col-xs-1"><div class="form-group"><label>'+objectName+'</label><input type="text" class="form-control" placeholder="0 - 10" id="'+objectName+'"></div><select class="form-control" id="'+objectName+'-NN"><option>Посты-NN</option><option>Название-NN</option></select></div>');
+    }
+  });
+  $("#coefficients").append('<button id="reloadTable" type="submit" class="btn btn-default" style="margin-top: 25px;"><i>обновить таблицу</i></button>');
+}
+
+async function openColumnsList(){
+  $('#currentColumns').empty();
+  var columns = $.myTable.specialColumn.concat($.myTable.baseHeaderNames.concat($.myTable.allThemes));
+  $.each(columns, function(indexColumn, column) {
+    $('#currentColumns').append('<div class="form-check"><input id="column_'+column.replaceAll(' ', '_')+'" class="form-check-input" type="checkbox" checked=""><label class="form-check-label"><a>'+column+'</a></label></div>');
+    var script= document.createElement('script');
+    script.type= 'text/javascript';
+    scriptText = '$("#column_' + column.replaceAll(' ', '_') +'")[0].checked = $.myTable.visibleColums["'+ column +'"]; $("#column_' + column.replaceAll(' ', '_') + '").click(function(){$.myTable.visibleColums["'+ column +'"] = !$.myTable.visibleColums["'+ column +'"];$.myTable.updateVisibleColumns()});';
+    script.textContent = scriptText;
+    script.async = true;
+    document.body.appendChild(script);
+  });
+}
+
+async function updateListOfSubscribers(){
+  $('#listOfSubscribers').empty();
+  $('#listOfSubscribers').append('<button class="btn btn-primary btn-block" id="openDownloadUsersWindow" style="width: 80%; margin-left: auto; margin-right: auto;">Скачать аудиторию</button>');
+
+  var script= document.createElement('script');
+  script.type= 'text/javascript';
+  script.textContent = '$("#openDownloadUsersWindow").click( function(){console.log("open downloadUsersWindow");document.getElementById("downloadUsersWindow").style.display = "";});';
+  script.async = false;
+  document.body.appendChild(script);
+
+  listsOfSubscribers = await getResponseFromApi('GET', 'getListsOfSubscribers', '');
+  $.each(listsOfSubscribers, function(itemKey, listOfSubscribers){
+    $('#listOfSubscribers').append('<li><a id="usersList-' + listOfSubscribers.replaceAll(' ', '_') + '"><i class="fa fa-circle-o"></i> ' + listOfSubscribers + '</a></li>');
+
+    var script= document.createElement('script');
+    script.type= 'text/javascript';
+    script.textContent = '$("#usersList-' + listOfSubscribers.replaceAll(' ', '_') + '").click(async function(){a = "' + listOfSubscribers + '";var res = await getResponseFromApi("POST", "getListOfSubscribersByName", {"listOfSubscribersName": a}); await exportArray(res, a);});';
+    script.async = false;
+    document.body.appendChild(script);
+  });
+}
+
+async function updateListOfTask(){
+  $('#currentTask').empty();
+  $('#currentTask').append('<button class="btn btn-primary btn-block" id="openLearnWindow" style="width: 80%; margin-left: auto; margin-right: auto;">Создать новую</button>');
+
+  var script= document.createElement('script');
+  script.type= 'text/javascript';
+  script.textContent = '$("#openLearnWindow").click( function(){console.log("open learnWindow");document.getElementById("learnWindow").style.display = "";});';
+  script.async = false;
+  document.body.appendChild(script);
+
+  currentTasks = await getResponseFromApi('GET', 'getStateOfProgres', '');
+  currentTasks = currentTasks['learn'];
+  console.log(currentTasks);
+  Object.keys(currentTasks).forEach(itemKey => {
+    if (currentTasks[itemKey] != 'stopping'){
+      $('#currentTask').append('<li><a id="task-' + itemKey + '"><i class="fa fa-circle-o"></i>' + itemKey + ' - ' + currentTasks[itemKey] + '% (прервать)</a></li>');
+
+      var script= document.createElement('script');
+      script.type= 'text/javascript';
+      script.textContent = '$("#task-' + itemKey + '").click(function(){a = "' + itemKey + '";getResponseFromApi("POST", "stoppingLearn", {"theme": a});$("#task-' + itemKey + '").empty();});';
+      script.async = true;
+      document.body.appendChild(script);
+    }
+    else {
+      $('#currentTask').append('<li><a id="task-' + itemKey + '"><i class="fa fa-circle-o"></i>' + itemKey + ' - stopping...</a></li>');
+    }
+  });
+}
+
+async function updateListOfSessions(){
+  $('#currentSessions').empty();
+  $('#currentSessions').append('<button class="btn btn-primary btn-block" id="openClassifyWindow" style="width: 80%; margin-left: auto; margin-right: auto;">Создать новую</button>');
+
+  var script= document.createElement('script');
+  script.type= 'text/javascript';
+  script.textContent = '$("#openClassifyWindow").click( function(){console.log("open classifyWindow");document.getElementById("classifyWindow").style.display = "";});';
+  script.async = false;
+  document.body.appendChild(script);
+
+  currentSessions = await getResponseFromApi('GET', 'getlistOfSessions', '');
+  console.log(currentSessions);
+  currentSessionsProgress = await getResponseFromApi('GET', 'getStateOfProgres', '');
+  $.each(currentSessions, function(itemKey, sessionName){
+    var progress = currentSessionsProgress['classify'];
+    if (sessionName in progress){
+      progress = '(' + progress[sessionName] + '%)';
+    }else{
+      progress = '';
+    }
+    var color = '';
+    if (sessionName == $.currentTableName) { color = 'style="color:red;"'; }
+    $('#currentSessions').append('<li><a id="session-' + sessionName.replaceAll(' ', '_') + '" ' + color + '><i class="fa fa-circle-o"></i> ' + progress + ' ' + sessionName + '</a></li>');
+
+    var script= document.createElement('script');
+    script.type= 'text/javascript';
+    script.textContent = '$("#session-' + sessionName.replaceAll(' ', '_') + '").click(async function(){if ($.currentTableName != ""){ document.getElementById("session-" + $.currentTableName.replaceAll(" ", "_")).style = ""; } a = "' + sessionName + '"; $.currentTableName = a; var newData = await getResponseFromApi("POST", "getDataFromSession", {"sessionName": a});console.log(newData);$.myTable.buildBodyWithResult(newData); this.style.color = "red";});';//$("#session-' + sessionName.replaceAll(' ', '_') + '")
+    script.async = false;
+    document.body.appendChild(script);
+  });
+}
+
+function exportArray(groupIds, fileName){
+  var type = 'data:application/octet-stream;base64, ';
+  text = '';
+  $.each(groupIds, function(index, groupId){
+    text += groupId + '\n';
+  });
+  var base = btoa(text);
+  var res = type + base;
+  var link = document.createElement("a");
+  link.download = fileName + ".txt";
+
+  link.href = res;
+  link.click();
+}
+
+async function removeTheme(theme) {
+  /*
+  $.results.headers = ['Название', 'Cсылка', 'Размер аудитории'].concat(await getResponseFromApi('POST', 'removeTheme', {"theme":theme}));
+
+  await $.results.items.forEach(item => {
+    delete item['data'][theme]; 
+  });
+  await resetTable();
+  await buildTable();
+  */
+}
+
+function getValuesFromFieldsForClassify(){
+  var items = {'name': 0, 'status': 0, 'disc': 0, 'posts': 0, 'videos': 0, 'albums': 0, 'topics': 0, 'links': 0};
+  var summ = 0;
+  $.each(items, function(key, val){
+    var nameIndex = document.getElementById(key).options.selectedIndex;
+    items[key] = document.getElementById(key).options[nameIndex].text;
+    summ += Number(items[key]);
+  });
+  items['sum']=summ;
+  return items;
+}
+
+async function classifyAllItems() {
+  var groupURLs = document.getElementById("groupsForClassify").value
+  var coefficientsForClassify = getValuesFromFieldsForClassify();
+  console.log(coefficientsForClassify['sum']);
+
+  groupURLs = groupURLs.split('\n');
+
+  var classifyQuery = []
+  $.each(groupURLs, function(index, groupURL) {
+    classifyQuery.push({"Ссылка": groupURL, "Участники": "Нет"});
+  });
+  commonUsersFrom = String(Number(document.getElementById("commonUsersFrom").value));
+  commonUsersTo = String(Number(document.getElementById("commonUsersTo").value));
+  typeOfInputData = document.getElementById("typeOfInputData").value;
+  sessionName = document.getElementById("sessionName").value;
+  closedGroups = document.getElementById("closedGroups").value;
+  var arrOfRelations = await getResponseFromApi('POST', 'classifyAllThemes', {'URLs': classifyQuery, 'countName': coefficientsForClassify['name'], 'countDescription': coefficientsForClassify['disc'], 'countStatus': coefficientsForClassify['status'], 'countPosts': coefficientsForClassify['posts'], 'countLinks': coefficientsForClassify['links'], 'countAlbums': coefficientsForClassify['albums'], 'countVideos': coefficientsForClassify['videos'], 'countTopcis': coefficientsForClassify['topics'], 'commonUsersFrom': commonUsersFrom, 'commonUsersTo': commonUsersTo, 'token': $.token, 'typeOfInputData': typeOfInputData, 'sessionName': sessionName, 'closedGroups': closedGroups});
+  return arrOfRelations
+}
+
+async function learnNNWithSpecifiedItems() {
+  var groupURLs = document.getElementById("groupsForLearn").value.split('\n');
+  var theme = document.getElementById("themeForLearn").value;
+  if (theme.indexOf('.') + 1){
+    alert('В названии темы не может быть точек (символ ".")');
+    return 0;
+  }
+  document.getElementById("groupsForLearn").value = "";
+  document.getElementById("themeForLearn").value = "";
+
+  var data = {'groupURLs': groupURLs, 'theme': theme, 'epoch': '250', 'countPosts': '100', 'token': $.token};
+  var arrOfBadGroups = await getResponseFromApi('POST', 'learn', data);
+  console.log(arrOfBadGroups);
+}
+
+function sortTable(f,n){
+  console.log(n);
+  var rows = $('.table-data').get();
+  rows.sort(function(a, b) {
+
+    var A = getVal(a);
+    var B = getVal(b);
+
+    if(A < B) {
+      return -1*f;
+    }
+    if(A > B) {
+      return 1*f;
+    }
+    return 0;
+  });
+
+  function getVal(elm){
+    var v = $(elm).children('td').eq(n).text().toUpperCase().split(' %')[0];
+    if($.isNumeric(v)){
+      v = Number(v);
+    }
+    return v;
+  }
+  $.each(rows, function(index, row) {
+    $('#resultsTableBody').append(row);
+  });
+}
+
+function toTranslit(text) {
+    return text.replace(/([а-яё])|([\s_-])|([^a-z\d])/gi,
+    function (all, ch, space, words, i) {
+        if (space || words) {
+            return space ? '-' : '';
+        }
+        var code = ch.charCodeAt(0),
+            index = code == 1025 || code == 1105 ? 0 :
+                code > 1071 ? code - 1071 : code - 1039,
+            t = ['yo', 'a', 'b', 'v', 'g', 'd', 'e', 'zh',
+                'z', 'i', 'y', 'k', 'l', 'm', 'n', 'o', 'p',
+                'r', 's', 't', 'u', 'f', 'h', 'c', 'ch', 'sh',
+                'shch', '', 'y', '', 'e', 'yu', 'ya'
+            ]; 
+        return t[index];
+    });
+}
+String.prototype.replaceAll = function(search, replacement) {
+    var target = this;
+    return target.replace(/[^0-9a-zA-ZА-Яа-яЁё ]/g, '').replace(new RegExp(search, 'g'), replacement);
+};
+
+function first2NomberAfterDot(n, pow){
+  if (n == 'Нет'){
+    return 'Нет';
+  }
+  exp = 10;
+  val = Math.floor(n);
+  while (val < Math.pow(10, pow - 2)){
+    val = n * exp;
+    exp = exp * 10;
+  }
+  return Math.floor(n * exp) / exp  + ' %';
+}
+
+async function getResponseFromApi (type, method, data){
+  var returnData;
+  console.log(JSON.stringify(data));
+  await $.ajax({
+    type: type,
+    url: document.location.href.split('table')[0] + "api/" + method, //('?code=')[0]
+    data: JSON.stringify(data),
+    contentType:"application/json",
+    complete: function(data){
+      returnData = data.responseJSON;
+    }
+  });
+  return returnData;
+}
+
+async function getVKId (code){
+  var returnData;
+  await $.ajax({
+    type: 'POST',
+    url: document.location.href.split('table')[0] + "api/authVK",
+    data: JSON.stringify({'code': code}),
+    contentType:"application/json",
+    complete: function(data){
+      returnData = data.responseJSON;
+    }
+  });
+  return returnData;
+}
+</script>
+</body>
+</html>
